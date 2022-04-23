@@ -11,6 +11,11 @@
 
   --gate-container-height: 8rem;
   --gate-container-width: 5.2rem;
+
+  --floor: 2;
+  --floor-shift: calc(var(--floor))*-100%;
+  --border-shift: calc(var(--floor)*8px);
+  --liftTime: 1;
 }
 
 *,
@@ -178,13 +183,9 @@ body {
              -5px -5px 9px #ffffff;
 }
 
-/* .btn-round > span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-} */
+.btn-round > span {
+  pointer-events: none;
+}
 
 .btn-round:hover, .btn-round:active {
   opacity: 0.72;
@@ -200,10 +201,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* transform: translateY(calc(-100% - 8px)); */
+  transition: transform calc(var(--liftTime)*0.5s) linear;
   /* transform: translateY(calc(-200% - 16px)); */
   /* transform: translateY(calc(-300% - 24px)); */
 }
+
+.move {
+  transform : translateY(calc(var(--floor-shift) - var(--border-shift)));
+}
+
 .gate {
   width: 88%;
   height: 88%;

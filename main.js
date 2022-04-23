@@ -4,36 +4,78 @@ const reset = document.getElementById('reset');
 const form = document.getElementById('input-form');
 const floorsInput = document.getElementById('floors');
 const liftsInput = document.getElementById('lifts');
-const queue = [];
 const building = document.getElementById('lift-simulator');
-
+let lift = null;
+let doorLeft = null;
+let doorRight = null;
+let queue = [];
+let qIntervalId, t1, t2, t3;
+let isQueuePaused = false;
+let lastFloorVisited = 0;
+//? Event listeners
 reset.addEventListener('click', function() {
   floorsInput.value = '';
   liftsInput.value = '';
-  // form.classList.remove('slide-up');
-  // building.classList.remove('slide-up');
+  resetSimulator();
 });
 
 form.addEventListener('submit', function(event) {
   event.preventDefault();
-  // form.classList.add('slide-up');
-  // building.classList.add('slide-up');
-  generateBuilding();
+  run();
 });
 
 
 building.addEventListener('click', function(event) {
-  // if(event.target.className.indexOf('button') >= 0) {
-    console.dir(event.target)
-    console.dir(event.target.dataset.floorNo);
-    console.dir(event.target.dataset.direction);
-  // }
+  if(event.target.className.indexOf('btn-round') >= 0) {
+    addLiftRequest({direction: event.target.dataset.direction, floorNo: parseInt(event.target.dataset.floorNo)});
+  }
 });
 
-// Run
+//? Run the code
+function run() {
+  resetSimulator();
+  generateBuilding();
+  lift = document.querySelector('.gate-container');
+  doorLeft = document.querySelector('.door-left');
+  doorRight = document.querySelector('.door-right');
+  qIntervalId = setInterval(function checkQueue() {
+    if(!isQueuePaused && queue.length > 0) {
+      isQueuePaused = true;
+      const {floorNo} = queue.shift();
+      console.log(floorNo);
+      moveLift(floorNo);
+      lastFloorVisited = floorNo-1;
+    }
+  }, 200);
+}
+run();
+
+//? common functions
+function moveLift(floorNo) {
+  const dist = Math.abs(lastFloorVisited - floorNo);
+  document.documentElement.style.setProperty('--floor', floorNo-1);
+  document.documentElement.style.setProperty('--liftTime', dist);
+  // translateY(calc(-${(floorNo-1)*100}% - ${8*(floorNo-1)}px))
+  // lift.style.transform = q;
+  lift.classList.add("move");
+  clearTimeout(t1);
+  clearTimeout(t2);
+  clearTimeout(t3);
+  t1 = setTimeout(() => {
+    doorLeft.classList.add('slideLeft');
+    doorRight.classList.add('slideRight');
+  }, 500*(dist));
+  t2 = setTimeout(() => {
+    doorLeft.classList.remove('slideLeft');
+    doorRight.classList.remove('slideRight');
+  }, 500*(dist)+2500);
+  t3 = setTimeout(() =>{
+    isQueuePaused = false;
+  }, 500*(dist)+5000);
+}
 
 function generateBuilding(){
-  resetBuilding();
+  resetSimulator();
   const intFloors = parseInt(floorsInput.value);
   const noOfFloors = isNaN(intFloors) ? 0 : intFloors;
   if(noOfFloors === 0) return;
@@ -42,7 +84,12 @@ function generateBuilding(){
   building.appendChild(floors);
 }
 
+function addLiftRequest(request) {
+  queue.push(request);
+}
+
 function addLiftsToBuilding(building, count = 0) {
+  //? for now we are adding 1 lift
   const lift = document.createElement('div');
   lift.classList.add('gate-container');
   lift.innerHTML = `<div class="gate">
@@ -52,18 +99,20 @@ function addLiftsToBuilding(building, count = 0) {
   building.lastChild.append(lift);
 }
 
-function resetBuilding() {
+function resetSimulator() {
   building.innerHTML = '';
+  queue = [];
+  clearInterval(qIntervalId);
 }
 
 function getFloors(count = 0) {
   const container = document.createElement('div');
   let floors = '';
-  for(let i = 0; i < count; i++) {
-    floors += `<div class="floor"><div class="floor-number">${i+1}</div>
+  for(let i = count; i > 0; i--) {
+    floors += `<div class="floor"><div class="floor-number">${i}</div>
     <div class="buttons">
-      <button data-floor-no=${i+1} data-direction="up" class="btn-round up"><span class="button fa fa-caret-up"></span></button>
-      <button data-floor-no=${i+1} data-direction="down" class="btn-round down"><span class="button fa fa-caret-down"></span></button>
+      <button data-floor-no=${i} data-direction="up" class="btn-round up"><span class="button fa fa-caret-up"></span></button>
+      <button data-floor-no=${i} data-direction="down" class="btn-round down"><span class="button fa fa-caret-down"></span></button>
     </div></div>`;
   }
   container.innerHTML = floors;
