@@ -1,0 +1,243 @@
+:root {
+  --color-primary: hsl(216, 18%, 16%);
+  --color-secondary: hsl(217, 10%, 25%);
+  --color-background: hsl(0, 0%, 90%);
+  --color-tertiary: hsl(183, 100%, 35%);
+
+  --lift-light-color: hsl(55, 100%, 94%);
+  --gate-container-color: hsl(35, 23%, 20%);
+  --gate-border-color: hsl(34, 65%, 35%);
+  --door-color: hsl(0, 0%, 67%);
+
+  --gate-container-height: 8rem;
+  --gate-container-width: 5.2rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+}
+
+#header {
+  overflow: hidden;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2);
+  background-color: var(--color-primary);
+  color: white;
+  min-width: 375px;
+  margin-bottom: 2rem;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  font-size: 1.16rem;
+}
+
+#logo {
+  float: left;
+  padding: 1.2rem 2rem;
+  letter-spacing: 2px;
+  font-weight: bolder;
+}
+
+#reset {
+  float: right;
+  padding: 1.2rem 1.8rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+  background-color: hsl(216, 18%, 20%);;
+}
+
+.container {
+  width: 92%;
+  margin: 0 auto;
+  max-width: 1368px;
+  min-width: 375px;
+}
+
+
+#input-form {
+  width: 30%;
+  min-width: 350px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2);
+  transition: transform 1s linear;
+}
+
+.slide-up {
+  transform: translateY(-600px);
+}
+
+#input-form label {
+  font-weight: 600;
+  display: block;
+}
+
+#input-form  input {
+  width: 100%;
+  display: block;
+  margin: 4px auto 16px auto;
+  padding: 8px 10px;
+}
+
+#input-form  input::selection {
+  color: white;
+  background-color: var(--color-tertiary)
+}
+
+#submit {
+  width: 100%;
+  padding: 0.6rem 2rem;
+  border: none;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  border-radius: 48px;
+}
+
+#submit:active,
+#submit:hover {
+  opacity: 0.88;
+}
+
+#lift-simulator {
+  margin-top: 2.8rem;
+  background-color: white;
+  padding: 1.6rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.floor {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  border: 2px solid var(--color-secondary);
+  border-bottom: none;
+  height: var(--gate-container-height);
+  padding: 1rem;
+}
+.floor:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: calc(1rem + 4px) 1rem 1rem 1rem;
+}
+.floor:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom: 2px solid var(--color-secondary);
+  padding: 1rem 1rem calc(1rem + 4px) 1rem;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.floor-number {
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-primary);
+  color: white;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.btn-round {
+  background-color: var(--color-tertiary);
+  color: white;
+  font-size: 1.2rem;
+  width: 44px;
+  height: 44px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  margin: 0.5rem 1rem;
+  box-shadow:  5px 5px 9px #e6e6e6,
+             -5px -5px 9px #ffffff;
+}
+
+/* .btn-round > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+} */
+
+.btn-round:hover, .btn-round:active {
+  opacity: 0.72;
+}
+
+.gate-container {
+  position: absolute;
+  bottom: 0;
+  left: 10rem;
+  width: var(--gate-container-width);
+  height: calc(var(--gate-container-height) - 8px);
+  background-color: var(--gate-container-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* transform: translateY(calc(-100% - 8px)); */
+  /* transform: translateY(calc(-200% - 16px)); */
+  /* transform: translateY(calc(-300% - 24px)); */
+}
+.gate {
+  width: 88%;
+  height: 88%;
+  border: 2px solid var(--gate-border-color);
+  position: relative;
+  overflow: hidden;
+  background-color: var(--lift-light-color);
+}
+
+.door {
+  position: absolute;
+  z-index: 3;
+  height: 100%;
+  width: 50%;
+  background-color: var(--door-color);
+  transition: transform 2.5s linear;
+}
+
+.door:first-child {
+  top: 0;
+  left: 0;
+  border-right: 1.6px solid #666;
+}
+
+.door:last-child {
+  top: 0;
+  right: 0;
+  border-left: 1.6px solid #666;
+}
+
+.slideLeft {
+  transform: translateX(-100%);
+}
+
+.slideRight {
+  transform: translateX(100%);
+}

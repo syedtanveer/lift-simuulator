@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lift simulator</title>
+  </head>
+  <body>
+    <header id="header">
+      <nav>
+        <span id="logo">Lift Simulator</span>
+        <span role="button" id="reset" class="fa fa-refresh"></span>
+      </nav>
+    </header>
+    <main class="container">
+      <form id="input-form">
+        <div class="form-control">
+          <label for="floors">No of floors</label>
+          <input id="floors" placeholder="Enter a number" name="floors" type="number"/>
+        </div>
+        <div class="form-control">
+          <label for="lifts">No of lifts</label>
+          <input id="lifts" value="1" disabled placeholder="Enter a number" name="lifts" type="number"/>
+        </div>
+        <button id="submit" type="submit">Generate</button>
+      </form>
+      <section id="lift-simulator">
+      </section>
+    </main>
+    <footer id="footer">
+    </footer>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
