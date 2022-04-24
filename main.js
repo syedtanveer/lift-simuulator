@@ -57,9 +57,8 @@ function moveLift(floorNo) {
   const dist = Math.abs(lastFloorVisited - floorNo);
   document.documentElement.style.setProperty('--floor', floorNo-1);
   document.documentElement.style.setProperty('--liftTime', dist);
-  // translateY(calc(-${(floorNo-1)*100}% - ${8*(floorNo-1)}px))
-  // lift.style.transform = q;
   lift.classList.add("move");
+  
   clearTimeout(t1);
   clearTimeout(t2);
   clearTimeout(t3);
@@ -113,8 +112,8 @@ function getFloors(count = 0) {
   for(let i = count; i > 0; i--) {
     floors += `<div class="floor"><div class="floor-number">${i}</div>
     <div class="buttons">
-      <button data-floor-no=${i} data-direction="up" class="btn-round up"><span class="button fa fa-caret-up"></span></button>
-      <button data-floor-no=${i} data-direction="down" class="btn-round down"><span class="button fa fa-caret-down"></span></button>
+      <button data-floor-no=${i} data-direction="up" class="btn-round up"><span class="button fa-solid fa-caret-up"></span></button>
+      <button data-floor-no=${i} data-direction="down" class="btn-round down"><span class="button fa-solid fa-caret-down"></span></button>
     </div></div>`;
   }
   container.innerHTML = floors;
