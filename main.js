@@ -11,7 +11,8 @@ let doorRight = null;
 let queue = [];
 let qIntervalId, t1, t2, t3;
 let isQueuePaused = false;
-let lastFloorVisited = 0;
+let lastFloorVisited = 1;
+
 //? Event listeners
 reset.addEventListener('click', function() {
   floorsInput.value = '';
@@ -42,9 +43,10 @@ function run() {
     if(!isQueuePaused && queue.length > 0) {
       isQueuePaused = true;
       const {floorNo} = queue.shift();
+      console.log(lastFloorVisited)
       console.log(floorNo);
       moveLift(floorNo);
-      lastFloorVisited = floorNo-1;
+      lastFloorVisited = floorNo;
     }
   }, 200);
 }
@@ -64,14 +66,14 @@ function moveLift(floorNo) {
   t1 = setTimeout(() => {
     doorLeft.classList.add('slideLeft');
     doorRight.classList.add('slideRight');
-  }, 500*(dist));
+  }, 2000*(dist));
   t2 = setTimeout(() => {
     doorLeft.classList.remove('slideLeft');
     doorRight.classList.remove('slideRight');
-  }, 500*(dist)+2500);
+  }, 2000*(dist)+2500);
   t3 = setTimeout(() =>{
     isQueuePaused = false;
-  }, 500*(dist)+5000);
+  }, 2000*(dist)+5000);
 }
 
 function generateBuilding(){

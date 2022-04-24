@@ -201,7 +201,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform calc(var(--liftTime)*0.5s) linear;
+  transition: transform calc(var(--liftTime)*2s) linear;
   /* transform: translateY(calc(-200% - 16px)); */
   /* transform: translateY(calc(-300% - 24px)); */
 }
