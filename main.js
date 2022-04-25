@@ -7,11 +7,17 @@ const floorsInput = document.getElementById('floors');
 const liftsInput = document.getElementById('lifts');
 const building = document.getElementById('lift-simulator');
 let lifts = null;
-
+let numberOfFloors = 0;
 //! Global variables
 let queue = [];
 let isQueuePaused = false;
 let qIntervalId = null;
+
+
+const DIRECTIONS = {
+  UP: 'up',
+  DOWN: 'down'
+}
 
 //? Event listeners
 reset.addEventListener('click', function() {
@@ -37,20 +43,38 @@ function run() {
   building.style.display = 'block';
   lifts = Array.from(document.querySelectorAll('.gate-container')).map(lift => ({
     lastFloorVisited: 1,
+    direction: null,
+    canBeQueued: true,
     lift
   }));
   qIntervalId = setInterval(function checkQueue() {
-    if(!isQueuePaused && queue.length > 0) {
-      isQueuePaused = true;
-      const {floorNo} = queue.shift();
+    if(/*!isQueuePaused &&*/ queue.length > 0) {
+      // isQueuePaused = true;
+      const {floorNo, direction} = queue.shift();
       //get what lift to move, using some algorithm
-      moveLift(floorNo, lifts[1]);
+      const nearestLift = getNearestLift(floorNo, direction);
+      nearestLift.canBeQueued = false;
+      moveLift(floorNo, nearestLift, direction);
     }
   }, 200);
 }
 
+function getNearestLift(floorNo, direction) {
+  // console.log(direction)
+  //find nearest lift going in same direction
+  console.log(lifts);
+  //if no direction or coming in same direction
+  const candidates  = lifts.filter(lift => {
+    return (lift.canBeQueued);
+  });
+  candidates.sort((a, b) => {
+    return Math.abs(a.lastFloorVisited - floorNo) - Math.abs(b.lastFloorVisited - floorNo);
+  });
+  return candidates[0] ? candidates[0] : lifts[0];
+}
+
 //? common functions
-function moveLift(floorNo, lift) {
+function moveLift(floorNo, lift, direction) {
   const dist = Math.abs(lift.lastFloorVisited - floorNo);
   // document.documentElement.style.setProperty('--floor', floorNo-1);
   // document.documentElement.style.setProperty('--liftTime', dist);
@@ -70,9 +94,20 @@ function moveLift(floorNo, lift) {
     doorRight.classList.remove('slideRight');
   }, 2000*(dist)+2500);
   t3 = setTimeout(() =>{
-    isQueuePaused = false;
+    lift.canBeQueued = true;
   }, 2000*(dist)+5000);
-
+  if(floorNo === numberOfFloors){
+    lift.direction = DIRECTIONS.DOWN;
+  }
+  else if(lift.lastFloorVisited - floorNo < 0) {
+    lift.direction = DIRECTIONS.UP;
+  }
+  else if(lift.lastFloorVisited - floorNo === 0) {
+    lift.direction = direction;
+  }
+  else {
+    lift.direction = DIRECTIONS.DOWN;
+  }
   lift.lastFloorVisited = floorNo;
 }
 
@@ -88,7 +123,7 @@ function generateBuilding(){
   const intFloors = parseInt(floorsInput.value);
   const noOfFloors = isNaN(intFloors) || intFloors <= 0 ? 0 : intFloors;
   if(noOfFloors === 0) return;
-
+  numberOfFloors = noOfFloors;
   const intLifts = parseInt(liftsInput.value);
   const noOfLifts = isNaN(intLifts) || intLifts <= 0 ? 0 : intLifts;
   if(noOfLifts === 0) return;
@@ -146,7 +181,6 @@ function getFloors(count = 0) {
 }
 
 function convertRemToPixels(rem) {   
-  console.log(getComputedStyle(document.documentElement).fontSize) 
   return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }
 

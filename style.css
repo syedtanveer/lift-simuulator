@@ -189,6 +189,14 @@ body {
   padding: 1rem 1rem calc(1rem + 4px) 1rem;
 }
 
+.floor:first-child .up {
+  display: none;
+}
+
+.floor:last-child .down {
+  display: none;
+}
+
 .buttons {
   display: flex;
   flex-direction: column;
