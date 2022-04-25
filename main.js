@@ -10,7 +10,6 @@ let lifts = null;
 let numberOfFloors = 0;
 //! Global variables
 let queue = [];
-let isQueuePaused = false;
 let qIntervalId = null;
 
 
@@ -48,36 +47,34 @@ function run() {
     lift
   }));
   qIntervalId = setInterval(function checkQueue() {
-    if(/*!isQueuePaused &&*/ queue.length > 0) {
-      // isQueuePaused = true;
-      const {floorNo, direction} = queue.shift();
+    if(queue.length > 0) {
+      const req = queue.shift();
       //get what lift to move, using some algorithm
+      const {floorNo, direction}  =req;
       const nearestLift = getNearestLift(floorNo, direction);
+      if(nearestLift === null) {
+        queue.unshift(req);
+        return;
+      }
       nearestLift.canBeQueued = false;
       moveLift(floorNo, nearestLift, direction);
     }
-  }, 200);
+  }, 400);
 }
 
 function getNearestLift(floorNo, direction) {
-  // console.log(direction)
-  //find nearest lift going in same direction
-  console.log(lifts);
-  //if no direction or coming in same direction
   const candidates  = lifts.filter(lift => {
     return (lift.canBeQueued);
   });
   candidates.sort((a, b) => {
     return Math.abs(a.lastFloorVisited - floorNo) - Math.abs(b.lastFloorVisited - floorNo);
   });
-  return candidates[0] ? candidates[0] : lifts[0];
+  return candidates[0] ? candidates[0] : null;
 }
 
 //? common functions
 function moveLift(floorNo, lift, direction) {
   const dist = Math.abs(lift.lastFloorVisited - floorNo);
-  // document.documentElement.style.setProperty('--floor', floorNo-1);
-  // document.documentElement.style.setProperty('--liftTime', dist);
   move(lift.lift, dist, floorNo - 1);
   const doorLeft = lift.lift.querySelector('.door-left');
   const doorRight = lift.lift.querySelector('.door-right');
