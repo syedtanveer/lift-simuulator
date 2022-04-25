@@ -1,17 +1,22 @@
 import './style.css';
 
+//! DOM elements
 const reset = document.getElementById('reset');
 const form = document.getElementById('input-form');
 const floorsInput = document.getElementById('floors');
 const liftsInput = document.getElementById('lifts');
 const building = document.getElementById('lift-simulator');
-let lift = null;
-let doorLeft = null;
-let doorRight = null;
+let lifts = null;
+let numberOfFloors = 0;
+//! Global variables
 let queue = [];
-let qIntervalId, t1, t2, t3;
-let isQueuePaused = false;
-let lastFloorVisited = 1;
+let qIntervalId = null;
+
+
+const DIRECTIONS = {
+  UP: 'up',
+  DOWN: 'down'
+}
 
 //? Event listeners
 reset.addEventListener('click', function() {
@@ -25,7 +30,6 @@ form.addEventListener('submit', function(event) {
   run();
 });
 
-
 building.addEventListener('click', function(event) {
   if(event.target.className.indexOf('btn-round') >= 0) {
     addLiftRequest({direction: event.target.dataset.direction, floorNo: parseInt(event.target.dataset.floorNo)});
@@ -34,31 +38,47 @@ building.addEventListener('click', function(event) {
 
 //? Run the code
 function run() {
-  resetSimulator();
   generateBuilding();
-  lift = document.querySelector('.gate-container');
-  doorLeft = document.querySelector('.door-left');
-  doorRight = document.querySelector('.door-right');
+  building.style.display = 'block';
+  lifts = Array.from(document.querySelectorAll('.gate-container')).map(lift => ({
+    lastFloorVisited: 1,
+    direction: null,
+    canBeQueued: true,
+    lift
+  }));
   qIntervalId = setInterval(function checkQueue() {
-    if(!isQueuePaused && queue.length > 0) {
-      isQueuePaused = true;
-      const {floorNo} = queue.shift();
-      console.log(lastFloorVisited)
-      console.log(floorNo);
-      moveLift(floorNo);
-      lastFloorVisited = floorNo;
+    if(queue.length > 0) {
+      const req = queue.shift();
+      //get what lift to move, using some algorithm
+      const {floorNo, direction}  =req;
+      const nearestLift = getNearestLift(floorNo, direction);
+      if(nearestLift === null) {
+        queue.unshift(req);
+        return;
+      }
+      nearestLift.canBeQueued = false;
+      moveLift(floorNo, nearestLift, direction);
     }
-  }, 200);
+  }, 400);
 }
-run();
+
+function getNearestLift(floorNo, direction) {
+  const candidates  = lifts.filter(lift => {
+    return (lift.canBeQueued);
+  });
+  candidates.sort((a, b) => {
+    return Math.abs(a.lastFloorVisited - floorNo) - Math.abs(b.lastFloorVisited - floorNo);
+  });
+  return candidates[0] ? candidates[0] : null;
+}
 
 //? common functions
-function moveLift(floorNo) {
-  const dist = Math.abs(lastFloorVisited - floorNo);
-  document.documentElement.style.setProperty('--floor', floorNo-1);
-  document.documentElement.style.setProperty('--liftTime', dist);
-  lift.classList.add("move");
-  
+function moveLift(floorNo, lift, direction) {
+  const dist = Math.abs(lift.lastFloorVisited - floorNo);
+  move(lift.lift, dist, floorNo - 1);
+  const doorLeft = lift.lift.querySelector('.door-left');
+  const doorRight = lift.lift.querySelector('.door-right');
+  let t1, t2, t3;
   clearTimeout(t1);
   clearTimeout(t2);
   clearTimeout(t3);
@@ -71,17 +91,42 @@ function moveLift(floorNo) {
     doorRight.classList.remove('slideRight');
   }, 2000*(dist)+2500);
   t3 = setTimeout(() =>{
-    isQueuePaused = false;
+    lift.canBeQueued = true;
   }, 2000*(dist)+5000);
+  if(floorNo === numberOfFloors){
+    lift.direction = DIRECTIONS.DOWN;
+  }
+  else if(lift.lastFloorVisited - floorNo < 0) {
+    lift.direction = DIRECTIONS.UP;
+  }
+  else if(lift.lastFloorVisited - floorNo === 0) {
+    lift.direction = direction;
+  }
+  else {
+    lift.direction = DIRECTIONS.DOWN;
+  }
+  lift.lastFloorVisited = floorNo;
+}
+
+function move(lift, liftTime, floorNo) {
+  const floorShift = floorNo*-100 + '%';
+  const borderShift =  floorNo*8+'px';
+  lift.style.transition = `transform ${liftTime*2}s linear`;
+  lift.style.transform = `translateY(calc(${floorShift} - ${borderShift}))`;
 }
 
 function generateBuilding(){
   resetSimulator();
   const intFloors = parseInt(floorsInput.value);
-  const noOfFloors = isNaN(intFloors) ? 0 : intFloors;
+  const noOfFloors = isNaN(intFloors) || intFloors <= 0 ? 0 : intFloors;
   if(noOfFloors === 0) return;
+  numberOfFloors = noOfFloors;
+  const intLifts = parseInt(liftsInput.value);
+  const noOfLifts = isNaN(intLifts) || intLifts <= 0 ? 0 : intLifts;
+  if(noOfLifts === 0) return;
+
   const floors = getFloors(noOfFloors);
-  addLiftsToBuilding(floors);
+  addLiftsToBuilding(floors, noOfLifts);
   building.appendChild(floors);
 }
 
@@ -89,15 +134,27 @@ function addLiftRequest(request) {
   queue.push(request);
 }
 
-function addLiftsToBuilding(building, count = 0) {
+function addLiftsToBuilding(building, count) {
+  let totalWidth = 13;
   //? for now we are adding 1 lift
-  const lift = document.createElement('div');
-  lift.classList.add('gate-container');
-  lift.innerHTML = `<div class="gate">
+  for(let i = 0; i < count; i++) {
+    const lift = document.createElement('div');
+    lift.style.left = (5 + 6.4*(i+1)) + 'rem';
+    totalWidth += 6.4;
+    lift.classList.add('gate-container');
+    lift.innerHTML = `<div class="gate">
       <div class="door door-left"></div>
       <div class="door door-right"></div>
     </div>`;
-  building.lastChild.append(lift);
+    building.lastChild.append(lift);
+  }
+
+  //Resize building if there are too many lifts
+  const liftsWidth = convertRemToPixels(totalWidth);
+  if(getBuildingWidth() < liftsWidth) {
+    building.style.width = liftsWidth+'px';
+  }
+  document.documentElement.style.setProperty('--total-lifts-width', liftsWidth);
 }
 
 function resetSimulator() {
@@ -118,4 +175,12 @@ function getFloors(count = 0) {
   }
   container.innerHTML = floors;
   return container;
+}
+
+function convertRemToPixels(rem) {   
+  return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+
+function getBuildingWidth() {
+  return Math.min(document.documentElement.offsetWidth*.92, 1368);
 }
